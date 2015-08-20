@@ -8,10 +8,7 @@ from collections import deque
 
 from lxml import etree
 import requests
-
-
-url = 'http://clbc.tw/'
-cache_path = 'cache.html'
+import clime.now
 
 def save(url, path = None):
     if not path:
@@ -39,5 +36,31 @@ def find_urls(source_code):
     root = etree.HTML(source_code)
     return [a.attrib['href'] for a in root.xpath('//a') if 'href' in a.attrib]
 
-source_code = get(url)
-print find_urls(source_code)
+NEW = 0
+QUEUED = 1
+VISITED = 2
+
+def search_urls(url):
+    url_queue=deque([url])
+    url_state_map = {url:QUEUED}
+    while url_queue:
+        url = url_queue.popleft()
+        print url
+        try:
+            found_urls = find_urls(get(url))
+        except Exception, e:
+            url_state_map[url] = e
+            print 'Exception: %s' % e
+        except KeyboardInterrupt, e:
+            print url_state_map
+            return
+        else:
+            for found_url in found_urls:
+                if not url_state_map.get(found_url, NEW):
+                    url_queue.append(found_url)
+                    url_state_map[found_url] = QUEUED
+            url_state_map[url] = VISITED
+
+if __name__ == '__main__':
+    url = 'http://www.clbc.tw/'
+    search_urls(url)
