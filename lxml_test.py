@@ -117,6 +117,14 @@ def search_urls(url):
                     url_state_map[found_url] = QUEUED
             url_state_map[url] = VISITED
 
+
 if __name__ == '__main__':
-    url = 'http://www.clbc.tw/'
-    search_urls(url)
+    url = 'https://www.ptt.cc/bbs/Beauty/'
+    if len(sys.argv) < 2:
+        print 'Please input page number ( 1 ~ 500 )'
+    else:
+        for i in xrange(int(sys.argv[1])+1):
+            current_page_url = urlparse.urljoin( url, 'index' + str(i+900) + '.html')
+            print 'Current Url is :' + current_page_url
+            search_Beauty(current_page_url);
+            print 'Finish'
