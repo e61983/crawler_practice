@@ -8,7 +8,32 @@ from collections import deque
 
 from lxml import etree
 import requests
-import clime.now
+
+from PIL import Image
+from StringIO import StringIO
+import time
+import urlparse
+
+def saveImage(url, save_dir_path = 'image/'):
+    if not exists(save_dir_path):
+        makedirs(save_dir_path)
+    save_path = join(save_dir_path,md5(url).hexdigest())
+    if not exists(save_path):
+        content = requests.get(url).content
+        with open(save_path,'wb') as img:
+            img.write(content)
+    return save_path
+
+def showImage(url, save = False):
+    if (save):
+        with open(saveImage(url),'rb') as file:
+            img = Image.open(file)
+            img.show()
+    else:
+        file = requests.get(url).content
+        img = Image.open(StringIO(file))
+        img.show()
+        file.close()
 
 def get(url, cache_dir_path = 'cache/'):
 
