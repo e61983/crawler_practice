@@ -50,9 +50,20 @@ def get(url, cache_dir_path = 'cache/'):
             f.write(content)
     return content
 
-def find_urls(source_code):
+def to_Abs_link(base, url):
+    if not url.startswith('http://'):
+        return urlparse.urljoin(base, url)
+    else:
+        return url
+
+def find_urls(base, source_code):
     root = etree.HTML(source_code)
-    return [a.attrib['href'] for a in root.xpath('//a') if 'href' in a.attrib]
+    return  [to_Abs_link(base,a.attrib['href']) for a in root.xpath('//a') if 'href' in a.attrib]
+
+def find_url_image(base, source_code):
+    root = etree.HTML(source_code)
+    return  [to_Abs_link(base,a.attrib['src']) for a in root.xpath('//img') if 'src' in a.attrib]
+
 
 NEW = 0
 QUEUED = 1
