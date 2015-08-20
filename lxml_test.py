@@ -64,6 +64,33 @@ def find_url_image(base, source_code):
     root = etree.HTML(source_code)
     return  [to_Abs_link(base,a.attrib['src']) for a in root.xpath('//img') if 'src' in a.attrib]
 
+def search_Beauty(url):
+    url_queue=deque([url])
+    url_state_map = {url:QUEUED}
+    print 'URL : ' + url
+    try:
+        content = get(url)
+        found_urls = find_urls(url, content)
+    except Exception, e:
+        url_state_map[url] = e
+        print 'Exception: %s' % e
+    except KeyboardInterrupt, e:
+        print url_state_map
+        return
+    else:
+        for found_url in found_urls:
+            if not url_state_map.get(found_url, NEW):
+                if found_url.startswith('https://www.ptt.cc/bbs/Beauty/'):
+                    url_queue.append(found_url)
+                    url_state_map[found_url] = QUEUED
+        url_state_map[url] = VISITED
+
+    while url_queue:
+        url = url_queue.popleft()
+        content = get(url)
+        for img_address in find_url_image(url, content):
+            saveImage(img_address)
+
 
 NEW = 0
 QUEUED = 1
