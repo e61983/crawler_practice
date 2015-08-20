@@ -25,4 +25,12 @@ def get(url, path = None):
             f.write(content)
     return content
 
-print get(url, cache_path)
+root = etree.HTML(get(url, cache_path))
+head = root.find('head')
+print head
+head_children = head.getchildren()
+print head_children
+metas = head.findall('meta')
+print metas
+title_text = head.findtext('title')
+print title_text
