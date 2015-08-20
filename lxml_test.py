@@ -10,13 +10,6 @@ from lxml import etree
 import requests
 import clime.now
 
-def save(url, path = None):
-    if not path:
-        path = basename(url)
-    with open(path, 'w') as f:
-        f.write(requests.get(url).content)
-
-
 def get(url, cache_dir_path = 'cache/'):
 
     if not exists(cache_dir_path):
