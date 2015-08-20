@@ -1,9 +1,14 @@
 #!/usr/bin/env python
-# encoding: utf-8
+# -*- coding: utf-8 -*-
+import sys
+from os import makedirs
+from os.path import exists, join
+from hashlib import md5
+from collections import deque
 
-import requests
 from lxml import etree
-from os.path import exists
+import requests
+
 
 url = 'http://clbc.tw/'
 cache_path = 'cache.html'
@@ -15,22 +20,24 @@ def save(url, path = None):
         f.write(requests.get(url).content)
 
 
-def get(url, path = None):
-    if exists(path):
-        with open(path, 'r') as f:
-            content = f.read()
+def get(url, cache_dir_path = 'cache/'):
+
+    if not exists(cache_dir_path):
+        makedirs(cache_dir_path)
+
+    cache_path = join( cache_dir_path, md5(url).hexdigest())
+    if exists(cache_path):
+        with open(cache_path, 'r') as f:
+            content = f.read().decode('utf-8')
     else:
         content = requests.get(url).content
-        with open(path,'w') as f:
+        with open(cache_path,'w') as f:
             f.write(content)
     return content
 
-root = etree.HTML(get(url, cache_path))
-head = root.find('head')
-print head
-head_children = head.getchildren()
-print head_children
-metas = head.findall('meta')
-print metas
-title_text = head.findtext('title')
-print title_text
+def find_urls(source_code):
+    root = etree.HTML(source_code)
+    return [a.attrib['href'] for a in root.xpath('//a') if 'href' in a.attrib]
+
+source_code = get(url)
+print find_urls(source_code)
